@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({
-    name: {
+  productName: {
       type: String,
       required: true,
     },
@@ -13,23 +13,50 @@ const productSchema = new mongoose.Schema({
       type: Number,
       required: true,
     },
+    discount: {
+      type: Number,
+    },
     brand: {
       type: String,
       required: true,
     },
-    size: {
+    // sizeWeight: {
+    //   type: String,
+    //   enum: ['S', 'M', 'L', 'XL', 'XXL'], // Example sizes
+    //   required: true,
+    // },
+    // weight: {
+    //   type: String,
+    //   enum: [50, 100, 250, 500, 1000], // Fixed typo: 'emum' -> 'enum'
+    //   required: true,
+    // },
+    sizeWeight: [
+      {
+        size: {
+          type: String,
+          // enum: ['S', 'M', 'L', 'XL', 'XXL'], // Optional sizes enum
+          required: false // Make size optional
+        },
+        weight: {
+          type: Number,
+          // enum: [50, 100, 250, 500, 1000], // Optional weights enum in grams
+          required: false // Make weight optional
+        }
+      }
+    ],
+    
+    details: {
       type: String,
-      enum: ['S', 'M', 'L', 'XL', 'XXL'], // Example sizes
       required: true,
     },
-    weight: {
+    longDetails: {
       type: String,
-      enum: [50, 100, 250, 500, 1000], // Fixed typo: 'emum' -> 'enum'
       required: true,
     },
-    description: {
+
+    status: {
       type: String,
-      // Description is optional
+      
     },
     stock: {
       type: Number,
@@ -41,9 +68,9 @@ const productSchema = new mongoose.Schema({
       min: 0, // Ratings can't be less than 0
       max: 5, // Ratings can't exceed 5
     },
-    imageUrl: {
-      type: String,
-      required: false, // Optional field for product image
+    productImage: {
+      type: [String],
+      required: true, // Optional field for product image
     },
     createdAt: {
       type: Date,
