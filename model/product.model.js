@@ -20,16 +20,6 @@ const productSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-    // sizeWeight: {
-    //   type: String,
-    //   enum: ['S', 'M', 'L', 'XL', 'XXL'], // Example sizes
-    //   required: true,
-    // },
-    // weight: {
-    //   type: String,
-    //   enum: [50, 100, 250, 500, 1000], // Fixed typo: 'emum' -> 'enum'
-    //   required: true,
-    // },
     sizeWeight: [
       {
         size: {
@@ -44,6 +34,21 @@ const productSchema = new mongoose.Schema({
         }
       }
     ],
+    // sizeWeight: [
+    //   {
+    //     type: {
+    //       type: String,
+    //       enum: ['size', 'weight'],
+    //       required: true
+    //     },
+    //     value: {
+    //       type: String, // You can store both sizes and weights as strings, or use Number for weights
+    //       required: true
+    //     }
+    //   }
+    // ],
+    
+    color: { type: [String], required: false }, 
     
     details: {
       type: String,
