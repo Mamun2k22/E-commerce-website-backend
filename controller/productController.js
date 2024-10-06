@@ -1,6 +1,53 @@
 import { Product } from "../model/index.model.js";
 
 
+// Add new product
+export const addProduct = async (req, res) => {
+  const {
+    productName,
+    categoryName,
+    color,
+    productImage,
+    brand,
+    price,
+    discount,
+    status,
+    stock,
+    sizeWeight,
+    details,
+    longDetails,
+  } = req.body;
+
+  // Validate required fields
+  if (!productName || !categoryName || !productImage || !Array.isArray(productImage) || !price || !details || !longDetails) {
+    return res.status(400).json({ message: "Please fill in all required fields" });
+  }
+
+  try {
+    const newProduct = new Product({
+      productName,
+      categoryName,
+      color,
+      productImage,
+      brand,
+      price,
+      discount,
+      status,
+      stock,
+      sizeWeight,
+      details,
+      longDetails,
+    });
+    
+    await newProduct.save();
+    res.status(201).json({ message: "Product created successfully", product: newProduct });
+  } catch (error) {
+    console.error("Error adding product:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
 // Get product by ID
 export const singleProducts = async (req, res) => {
     try {

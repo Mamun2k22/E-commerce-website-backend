@@ -3,6 +3,7 @@ import { Product, UserProductId} from '../model/index.model.js'
 // POST API to add a product to the cart
 export const addToCart = async (req, res) => {
   const { productId, userId, quantity } = req.body;
+  console.log(req.body);
 
   try {
     // Fetch the product to get the price

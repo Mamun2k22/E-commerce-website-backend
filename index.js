@@ -1,11 +1,8 @@
 import dotenv from "dotenv";
-import { randomBytes } from 'crypto';
 import express from "express";
 import cors from "cors";
 import session from "express-session";
 import MongoStore from "connect-mongo";
-import jwt from "jsonwebtoken";
-// import multer from "multer";
 import cookieParser from "cookie-parser";
 import "./db/database.js"
 import authRoutes from "./routes/authRoutes.js"; 
@@ -33,7 +30,13 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
-  cookie: { maxAge: 1000 * 60 * 60 * 24 }, 
+  cookie: { 
+    maxAge: 1000 * 60 * 60 * 24, // 1 day expiration
+    secure: process.env.NODE_ENV === 'production', // Secure only in production
+    httpOnly: true, // Prevent access from JavaScript (for security)
+    sameSite: "strict" // Prevent cross-site request forgery (CSRF) attacks
+  },
+   
 }));
 
 app.use("/api/auth", authRoutes);
