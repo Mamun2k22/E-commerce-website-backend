@@ -4,14 +4,14 @@ import mongoose from "mongoose";
 const cartSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user", // Reference to the User model
+    ref: "User", // Reference to the User model
     required: true,
   },
   products: [
     {
       product: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "product", // Reference to the Product model
+        ref: "Product", // Reference to the Product model
         required: true,
       },
       quantity: {

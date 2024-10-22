@@ -2,15 +2,12 @@ import mongoose from "mongoose";
 
 // Define user schema
 const productUserIdSchema = new mongoose.Schema({
-  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user' }, // reference to user collection
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // reference to user collection
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' }, // Add productId to reference Product schema
   quantity: { type: Number, default: 1 },
-  totalprice: { type: Number, default: 1 },
-
-},
-
-{ collection: 'carts' }); // Explicitly set the collection name
+  itemPrice: { type: Number, default: 1 },
+}, { collection: 'carts' }); 
 
 // Export the user model
-const UserProductId = mongoose.model("UserProductId", productUserIdSchema);
-export default UserProductId;
+const AddToCart = mongoose.model("AddToCart", productUserIdSchema);
+export default AddToCart;

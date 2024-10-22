@@ -11,6 +11,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js"; 
 import colorRoutes from "./routes/colorRoutes.js"; 
 import cartRoutes from "./routes/cartRoutes.js"; 
+import orderRoutes from "./routes/orderRoutes.js"; 
 
 dotenv.config();
 const app = express();
@@ -19,8 +20,8 @@ const port = process.env.PORT || 5000;
 app.use(cors({
   origin: ['http://localhost:5173', 'https://bholamart.com', 'https://bhola-mart.netlify.app'],
   credentials: true, // Allows cookies
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Explicitly allow these HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Ensure the right headers are allowed
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], 
+  allowedHeaders: ['Content-Type', 'Authorization'], 
 }));
 
 app.use(cookieParser());
@@ -46,6 +47,7 @@ app.use('/api/category', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/colors', colorRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api', orderRoutes);
 
 // API routes
 app.get("/", (req, res) => {

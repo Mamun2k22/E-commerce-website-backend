@@ -1,5 +1,5 @@
 // userController.js
-import { User, UserProductId} from '../model/index.model.js'
+import { User, AddToCart} from '../model/index.model.js'
 
 
 // Controller function to get all users
@@ -19,6 +19,7 @@ export const getAllUsers = async (req, res) => {
 // Delete user by ID
 export const deleteUserById = async (req, res) => {
     const { id } = req.params;
+    console.log(req.params)
     try {
       const deletedUser = await User.findByIdAndDelete(id);
       if (!deletedUser) {
