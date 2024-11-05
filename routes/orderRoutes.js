@@ -1,4 +1,6 @@
 import express from "express";
+import { protect } from '../middleware/protect.js';
+import { isAdmin } from '../middleware/isAdmin.js';
 import {
   placeOrder,
   getUserOrders,
@@ -11,6 +13,8 @@ const router = express.Router();
 router.post("/order", placeOrder);
 router.get("/orders/:userId", getUserOrders);
 router.get("/order/:orderId", getOrderById);
-router.put("/order/:orderId", updateOrderStatus);
-router.delete("/order/:orderId", cancelOrder);
+
+// Admin-only routes
+router.put("/order/:orderId", protect, isAdmin, updateOrderStatus); // Update order status (admin)
+router.delete("/order/:orderId", protect, isAdmin, cancelOrder); // Cancel order (admin)
 export default router;

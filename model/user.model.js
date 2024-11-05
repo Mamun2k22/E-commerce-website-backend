@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 // import bcrypt from "bcryptjs";
 
-
 // // Define user schema
 // const userSchema = new mongoose.Schema({
 //   name: { type: String, required: true },
@@ -27,15 +26,19 @@ import mongoose from "mongoose";
 // const User = mongoose.model("User", userSchema);
 // export default User;
 
-
 // Define user schema
+
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   mobile: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   isVerified: { type: Boolean, default: false },
-  verificationToken: String, 
+  verificationOtp: String,
+  otpExpiresAt: Date,
+  role: { type: String, enum: ["user", "admin"], default: "user" },
+
+
 });
 
 // Export the user model

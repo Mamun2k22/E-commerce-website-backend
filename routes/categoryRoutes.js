@@ -1,6 +1,6 @@
-// categoryRoutes.js
-
 import express from 'express';
+import { isAdmin } from '../middleware/isAdmin.js';
+import { protect } from '../middleware/protect.js';
 import {
   addCategory,
   getAllCategories,
@@ -9,13 +9,14 @@ import {
 
 const router = express.Router();
 
-// Route to add a new category
-router.post('/', addCategory);
+// Admin route: Add a new category
+router.post('/', protect, isAdmin, addCategory); // Admin only
 
-// Route to get all categories
-router.get('/', getAllCategories);
+// User route: Get all categories
+router.get('/', getAllCategories); // Public access
 
-// Route to get products by category name
-router.get('/:name', getProductsByCategory);
+// User route: Get products by category name
+router.get('/:name', getProductsByCategory); // Public access
 
 export default router;
+

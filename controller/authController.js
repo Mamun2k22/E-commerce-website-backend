@@ -39,27 +39,31 @@ const authenticate = (req, res, next) => {
 };
 
 // User registration (signup)
+// User registration (signup)
 export const userSignup = async (req, res) => {
   const { name, mobile, email, password } = req.body;
-  console.log(req.body);
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const verificationToken = randomBytes(32).toString("hex");
-
-    // Hash the password before saving the user
+    const otp = (Math.floor(1000 + Math.random() * 9000)).toString(); // 6-digit OTP
     const hashedPassword = await bcrypt.hash(password, 10);
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
+
     const newUser = new User({
       name,
       mobile,
       email,
       password: hashedPassword,
-      verificationToken,
+      verificationOtp: otp,
+      otpExpiresAt,
+      role: "user", // Assign default role
     });
     await newUser.save();
+
+    // Send OTP via email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -67,21 +71,16 @@ export const userSignup = async (req, res) => {
         pass: process.env.APP_PASS,
       },
     });
-    const verificationUrl = `http://localhost:5000/api/auth/verify-email?token=${verificationToken}
-`;
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: req.body.email,
-      subject: "Verify your email",
-      html: `<p>Please click the following link to verify your email:</p>
-             <a href="${verificationUrl}">Verify Email</a>`,
+      subject: "Your OTP for Email Verification",
+      html: `<p>Your OTP for verifying your email is: <strong>${otp}</strong></p>`,
     };
 
     await transporter.sendMail(mailOptions);
-
-    res.status(201).json({
-      message: "User registered. Please check your email to verify your account.",
-    });
+    res.status(201).json({ message: "User registered. Please check your email for the OTP." });
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -89,6 +88,8 @@ export const userSignup = async (req, res) => {
 };
 
 
+
+// User login
 // User login
 export const userLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -112,7 +113,13 @@ export const userLogin = async (req, res) => {
     req.session.userId = user._id; // Store user ID in session
     res.status(200).json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, mobile: user.mobile },
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        mobile: user.mobile,
+        role: user.role // Return the user's role
+      },
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -121,26 +128,6 @@ export const userLogin = async (req, res) => {
 };
 
 
-// Email verification
-export const userVerifyEmail = async (req, res) => {
-  const { token } = req.query;
-  try {
-    const user = await User.findOne({ verificationToken: token });
-
-    if (!user) {
-      return res.status(400).json({ message: "Invalid or expired token" });
-    }
-
-    user.isVerified = true; // Update user to verified
-    user.verificationToken = null; // Remove the verification token after verification
-    await user.save();
-
-    res.status(200).json({ message: "Email verified successfully. You can now log in." });
-  } catch (error) {
-    console.error("Error verifying email:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
 
 // Logout user
 export const userLogout = (req, res) => {
@@ -161,6 +148,57 @@ export const userLogout = (req, res) => {
     res.status(200).json({ message: "Logged out successfully" });
   });
 };
+
+// OTP verification
+export const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+  console.log("email and otp", req.body)
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Check if OTP matches and is still valid
+    if (user.verificationOtp !== otp || user.otpExpiresAt < new Date()) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    // Mark user as verified and clear OTP
+    user.isVerified = true;
+    user.verificationOtp = null;
+    user.otpExpiresAt = null;
+    await user.save();
+
+    res.status(200).json({ message: "Email verified successfully. You can now log in." });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+// Email verification
+// export const userVerifyEmail = async (req, res) => {
+//   const { token } = req.query;
+//   try {
+//     const user = await User.findOne({ verificationToken: token });
+
+//     if (!user) {
+//       return res.status(400).json({ message: "Invalid or expired token" });
+//     }
+
+//     user.isVerified = true; 
+//     user.verificationToken = null; 
+//     await user.save();
+
+//     res.status(200).json({ message: "Email verified successfully. You can now log in." });
+//   } catch (error) {
+//     console.error("Error verifying email:", error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
 
 // Export the middleware for use in routes
 export { protect, authenticate };

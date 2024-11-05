@@ -88,3 +88,36 @@ export const deleteProductById = async (req, res) => {
     res.status(500).send({ message: "Internal Server Error" });
   }
 };
+
+export const searchQuery = async (req, res) => {
+  const { query } = req.query;
+  console.log(query)
+
+  try {
+    const products = await Product.find({
+      productName: { $regex: query, $options: "i" },
+    });
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Error searching products", error });
+  }
+};
+
+export const getRelatedProducts = async (req, res) => {
+  const { category } = req.params;
+  const { excludeId } = req.query;
+
+  try {
+    // Construct the filter object
+    const filter = { categoryName: category };
+    if (excludeId && excludeId.match(/^[0-9a-fA-F]{24}$/)) {
+      filter._id = { $ne: excludeId };
+    }
+
+    const relatedProducts = await Product.find(filter).limit(4);
+    res.status(200).json(relatedProducts);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching related products", error });
+  }
+};
+
