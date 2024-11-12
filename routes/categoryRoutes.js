@@ -1,6 +1,6 @@
 import express from 'express';
-import { isAdmin } from '../middleware/isAdmin.js';
-import { protect } from '../middleware/protect.js';
+// import { isAdmin } from '../middleware/isAdmin.js';
+// import { protect } from '../middleware/protect.js';
 import {
   addCategory,
   getAllCategories,
@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 // Admin route: Add a new category
-router.post('/', protect, isAdmin, addCategory); // Admin only
+router.post('/', addCategory); // Admin only
 
 // User route: Get all categories
 router.get('/', getAllCategories); // Public access

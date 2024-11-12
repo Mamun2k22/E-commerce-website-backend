@@ -121,3 +121,27 @@ export const getRelatedProducts = async (req, res) => {
   }
 };
 
+
+// Controller to fetch 6 random products from each category
+export const getDailyBestProducts = async (req, res) => {
+  try {
+    // Fetch all categories
+    const categories = await Category.find();
+
+    // Fetch 6 random products per category
+    const dailyBestProducts = await Promise.all(
+      categories.map(async (category) => {
+        const products = await Product.aggregate([
+          { $match: { categoryName: category.name } }, // Match products by category name
+          { $sample: { size: 6 } } // Randomly pick 6 products
+        ]);
+        return { category: category.name, products };
+      })
+    );
+
+    res.status(200).json(dailyBestProducts);
+  } catch (error) {
+    console.error("Error fetching daily best products:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
