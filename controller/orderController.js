@@ -3,8 +3,8 @@ import { User, Order, Product} from '../model/index.model.js'
 // Place a new order
 export const placeOrder = async (req, res) => {
     try {
-      const { cartItems, shippingOption, paymentMethod, shippingCost, totalCost, customer, userId, address } = req.body;
-      console.log("first", userId)
+      const { cartItems, shippingOption, paymentMethod, shippingCost, totalCost, customer, userId, address, selectedSize, selectedWeight, selectedColor } = req.body;
+      console.log("order detailsssssssss", req.body)
   
       const user = await User.findById(userId);
       if (!user) {
@@ -20,7 +20,10 @@ export const placeOrder = async (req, res) => {
         return {
           product: product._id,
           quantity: item.quantity,
-          price: item.price,  // Price from frontend (locked at time of order)
+          price: item.price,
+          selectedSize: item.selectedSize,    // Include selectedSize
+        selectedWeight: item.selectedWeight, // Include selectedWeight
+        selectedColor: item.selectedColor,     // Price from frontend (locked at time of order)
         };
       }));
   
@@ -37,6 +40,9 @@ export const placeOrder = async (req, res) => {
           mobile: customer.mobile || user.mobile,
         },
         address: address, 
+        selectedSize,
+        selectedWeight,
+        selectedColor
       });
   
       await newOrder.save();

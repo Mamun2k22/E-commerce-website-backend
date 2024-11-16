@@ -23,6 +23,12 @@ const OrderSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
+      selectedSize: { type: String },
+       // Add size for the selected product
+      selectedWeight: { type: String },
+       // Add weight for the selected product
+      selectedColor: { type: String },
+
     },
   ],
   totalPrice: {
@@ -32,6 +38,11 @@ const OrderSchema = new mongoose.Schema({
   address: {
     type: String,
     required: true,
+  },
+  customer: {
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    mobile: { type: String, required: true },
   },
   shippingCost: {
     type: Number,

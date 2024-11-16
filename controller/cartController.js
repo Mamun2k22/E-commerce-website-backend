@@ -3,8 +3,8 @@ import { Product, AddToCart} from '../model/index.model.js'
 
 
 export const addToCart = async (req, res) => {
-  const { productId, userId, quantity } = req.body;
-
+  const { productId, userId, quantity, selectedSize,  selectedWeight, selectedColor, } = req.body;
+console.log("add to cart product", req.body) ;
   try {
     // Fetch the product to get the price
     const product = await Product.findById(productId);
@@ -30,6 +30,9 @@ export const addToCart = async (req, res) => {
       productId,
       userId,
       quantity,
+      selectedSize,
+      selectedWeight,
+      selectedColor,
       itemPrice,
     });
 
@@ -52,7 +55,7 @@ export const getCarts = async (req, res) => {
   try {
     // Populate the product details (name and image) when fetching cart items
     const cartItems = await AddToCart.find({ userId: id })
-      .populate('productId', 'productName productImage'); // Populate productName and productImage
+      .populate('productId', 'productName productImage sizeWeight color'); // Populate productName and productImage
 
     if (!cartItems || cartItems.length === 0) {
       return res.status(404).json({ message: 'No cart items found' });
