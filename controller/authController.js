@@ -195,7 +195,7 @@ export const forgotPassword = async (req, res) => {
     await user.save();
 
     // Email setup
-    const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    const resetURL = `https://bholamart.com/reset-password/${resetToken}`;
     const message = `
       <p>You requested a password reset.</p>
       <p>Click <a href="${resetURL}">here</a> to reset your password.</p>
