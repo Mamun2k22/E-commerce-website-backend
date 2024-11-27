@@ -34,19 +34,6 @@ const productSchema = new mongoose.Schema({
         }
       }
     ],
-    // sizeWeight: [
-    //   {
-    //     type: {
-    //       type: String,
-    //       enum: ['size', 'weight'],
-    //       required: true
-    //     },
-    //     value: {
-    //       type: String, // You can store both sizes and weights as strings, or use Number for weights
-    //       required: true
-    //     }
-    //   }
-    // ],
     
     color: { type: [String], required: false }, 
     

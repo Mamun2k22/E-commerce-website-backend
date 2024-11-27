@@ -75,6 +75,28 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+// Update product by ID
+export const updateProductById = async (req, res) => {
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true } // Return the updated product
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Product updated successfully", product: updatedProduct });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
 // Delete product by ID
 export const deleteProductById = async (req, res) => {
 

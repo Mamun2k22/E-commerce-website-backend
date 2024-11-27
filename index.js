@@ -18,7 +18,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://bholamart.com', 'https://bhola-mart.netlify.app', 'https://bholamart-backend.vercel.app'],
+  origin: ['http://localhost:5173', 'https://bholamart.com', 'https://bhola-mart.netlify.app',],
   credentials: true, // Allows cookies
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], 
   allowedHeaders: ['Content-Type', 'Authorization'], 

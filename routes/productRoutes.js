@@ -7,7 +7,7 @@ import {
   deleteProductById,
   singleProducts,
   searchQuery,
-  getRelatedProducts,
+  getRelatedProducts, updateProductById
 } from '../controller/productController.js';
 
 const router = express.Router();
@@ -18,6 +18,8 @@ router.get('/:id', singleProducts);
 router.get('/related/:category', getRelatedProducts); // View related products by category (public)
 router.get('/', getAllProducts); 
 router.post('/', addProduct); 
-router.delete('/:id',  deleteProductById); 
+router.delete('/:id', deleteProductById); 
+router.put('/:id', updateProductById);
+
 
 export default router;

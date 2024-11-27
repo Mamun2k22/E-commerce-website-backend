@@ -42,13 +42,50 @@ const authenticate = (req, res, next) => {
 // User registration (signup)
 export const userSignup = async (req, res) => {
   const { name, mobile, email, password } = req.body;
+
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
+
+    // If the user exists and is verified, return an error
+    if (existingUser && existingUser.isVerified) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const otp = (Math.floor(1000 + Math.random() * 9000)).toString(); // 6-digit OTP
+    // If the user exists but is not verified, overwrite the user data
+    if (existingUser && !existingUser.isVerified) {
+      const otp = (Math.floor(1000 + Math.random() * 9000)).toString(); // 4-digit OTP
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
+
+      existingUser.name = name;
+      existingUser.mobile = mobile;
+      existingUser.password = hashedPassword;
+      existingUser.verificationOtp = otp;
+      existingUser.otpExpiresAt = otpExpiresAt;
+      await existingUser.save();
+
+      // Send OTP via email
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.APP_PASS,
+        },
+      });
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Your OTP for Email Verification",
+        html: `<p>Your OTP for verifying your email is: <strong>${otp}</strong></p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+      return res.status(200).json({ message: "OTP sent again. Please check your email for the OTP." });
+    }
+
+    // If the user does not exist, create a new user
+    const otp = (Math.floor(1000 + Math.random() * 9000)).toString(); // 4-digit OTP
     const hashedPassword = await bcrypt.hash(password, 10);
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
 
@@ -74,18 +111,20 @@ export const userSignup = async (req, res) => {
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: req.body.email,
+      to: email,
       subject: "Your OTP for Email Verification",
       html: `<p>Your OTP for verifying your email is: <strong>${otp}</strong></p>`,
     };
 
     await transporter.sendMail(mailOptions);
     res.status(201).json({ message: "User registered. Please check your email for the OTP." });
+
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 
 
@@ -149,19 +188,26 @@ export const userLogout = (req, res) => {
   });
 };
 
-// OTP verification
 export const verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
-  console.log("email and otp", req.body)
+  console.log("Received email and OTP:", email, otp);
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
+      console.error("User not found:", email);
       return res.status(400).json({ message: "User not found" });
     }
 
     // Check if OTP matches and is still valid
-    if (user.verificationOtp !== otp || user.otpExpiresAt < new Date()) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
+    if (user.verificationOtp !== otp) {
+      console.error("Invalid OTP for user:", email);
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    if (!user.otpExpiresAt || user.otpExpiresAt < new Date()) {
+      console.error("Expired OTP for user:", email);
+      return res.status(400).json({ message: "Expired OTP" });
     }
 
     // Mark user as verified and clear OTP
@@ -170,12 +216,16 @@ export const verifyOtp = async (req, res) => {
     user.otpExpiresAt = null;
     await user.save();
 
-    res.status(200).json({ message: "Email verified successfully. You can now log in." });
+    console.log("User verified successfully:", email);
+    res.status(200).json({
+      message: "Email verified successfully. You can now log in.",
+    });
   } catch (error) {
     console.error("Error verifying OTP:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // Forgot password function
 export const forgotPassword = async (req, res) => {
@@ -195,7 +245,7 @@ export const forgotPassword = async (req, res) => {
     await user.save();
 
     // Email setup
-    const resetURL = `https://bholamart.com/reset-password/${resetToken}`;
+    const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
     const message = `
       <p>You requested a password reset.</p>
       <p>Click <a href="${resetURL}">here</a> to reset your password.</p>
@@ -229,9 +279,14 @@ export const forgotPassword = async (req, res) => {
 // Reset password
 export const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
+  console.log("req.body")
+
   try {
+    // Hash the incoming token
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
     const user = await User.findOne({
-      resetPasswordToken: token,
+      resetPasswordToken: hashedToken,
       resetPasswordExpires: { $gt: Date.now() }, // Check if token is still valid
     });
 
@@ -251,6 +306,7 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // Email verification
 // export const userVerifyEmail = async (req, res) => {
