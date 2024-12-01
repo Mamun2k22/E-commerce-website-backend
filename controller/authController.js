@@ -38,7 +38,6 @@ const authenticate = (req, res, next) => {
   });
 };
 
-
 // User registration (signup)
 export const userSignup = async (req, res) => {
   const { name, mobile, email, password } = req.body;
@@ -125,11 +124,7 @@ export const userSignup = async (req, res) => {
   }
 };
 
-
-
-
 // User login
-
 export const userLogin = async (req, res) => {
   const { email, password } = req.body;
   try {
